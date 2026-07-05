@@ -2,6 +2,7 @@
 # Part of the ifURI solution.
 
 from .core import (
+    policy_allow,
     CONNECTOR_ID,
     connector_manifest,
     main,

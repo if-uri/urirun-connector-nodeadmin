@@ -50,6 +50,19 @@ def registry_rebuild() -> dict[str, Any]:
         r.get("error") or "rebuild failed", "registry-rebuild", **r)
 
 
+@conn.handler("policy/command/allow", isolated=True,
+              meta={"label": "Unblock a scheme: add a glob (e.g. app://**) to the node's serve allow-list + restart"})
+def policy_allow(glob: str = "") -> dict[str, Any]:
+    """The simple remote unblock. A 'default deny' block (e.g. app:// launch) IS the node's
+    own allow-list, set at startup — this adds the glob and restarts, no reinstall."""
+    if not glob or "://" not in glob:
+        return _fail("glob is required (e.g. 'app://**')", "policy-allow")
+    from .ops import add_allow
+    r = add_allow(glob)
+    return _ok(action="policy-allow", **r) if r.get("ok") else _fail(
+        r.get("error") or "allow failed", "policy-allow", **r)
+
+
 @conn.handler("runtime/command/restart", isolated=True,
               meta={"label": "Restart the node service (drops stale warm workers) — detached, survives this call"})
 def runtime_restart() -> dict[str, Any]:

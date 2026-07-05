@@ -78,3 +78,14 @@ def test_connector_exposes_the_management_routes():
                   "runtime/command/upgrade", "runtime/command/rollback", "worker/command/reload",
                   "smoke/command/run"):
         assert route in text
+
+
+def test_add_allow_rewrites_runner_and_restarts(tmp_path):
+    (tmp_path / "run-node.sh").write_text(
+        '#!/usr/bin/env bash\nexec /x/urirun node serve --config /c --execute\n')
+    r = ops.add_allow("app://**", root=tmp_path, runner=_fake_runner())
+    assert r["ok"] and r["glob"] == "app://**"
+    assert "--allow 'app://**'" in (tmp_path / "run-node.sh").read_text()
+    # idempotent
+    r2 = ops.add_allow("app://**", root=tmp_path, runner=_fake_runner())
+    assert r2.get("already") is True

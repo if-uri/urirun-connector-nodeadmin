@@ -95,6 +95,28 @@ def restart(root: Path | None = None, spawn: Callable[[list[str]], Any] | None =
     return {"ok": True, "restarting": True, "detail": "service restart scheduled (detached)"}
 
 
+# --- policy/command/allow: unblock a scheme by adding it to the serve allow-list -----
+def add_allow(glob: str, root: Path | None = None, runner: Runner = _run) -> dict[str, Any]:
+    """Add ``glob`` (e.g. app://**) to the node's serve allow-list by rewriting the runner
+    and restarting. This is the simple, remote unblock for a default-deny scheme — no
+    reinstall, no file editing by hand. The block was the node's own allow-list; this edits it."""
+    root = root or install_dir()
+    run_sh = root / "run-node.sh"
+    if not run_sh.is_file():
+        return {"ok": False, "error": f"no runner at {run_sh}"}
+    text = run_sh.read_text(encoding="utf-8")
+    flag = f"--allow {glob!r}".replace('"', "'")
+    if glob in text:
+        return {"ok": True, "already": True, "glob": glob}
+    lines = []
+    for ln in text.splitlines():
+        if "node serve" in ln and "--allow " + repr(glob) not in ln:
+            ln = ln.rstrip() + f" --allow '{glob}'"
+        lines.append(ln)
+    run_sh.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {"ok": True, "glob": glob, "restart": restart(root)}
+
+
 # --- runtime/command/upgrade & rollback (atomic releases) ------------------------
 def upgrade(release_id: str, *, root: Path | None = None, spec: str = "urirun",
             connectors: list[str] | None = None, runner: Runner = _run,
