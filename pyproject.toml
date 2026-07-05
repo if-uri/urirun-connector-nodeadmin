@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urirun-connector-nodeadmin"
+version = "0.1.0"
+description = "Node-side management surface (node:// runtime/registry/worker/smoke) that a urirun-fleet reconcile plan drives: rebuild, restart, atomic upgrade, rollback."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Tom Sapletta" }]
+dependencies = ["urirun>=0.4.14", "urirun-fleet>=0.1.0"]
+
+[project.scripts]
+urirun-nodeadmin = "urirun_connector_nodeadmin.core:main"
+
+[project.entry-points."urirun.bindings"]
+nodeadmin = "urirun_connector_nodeadmin.core:urirun_bindings"
+
+[tool.setuptools.packages.find]
+include = ["urirun_connector_nodeadmin*"]
+
+[tool.setuptools.package-data]
+urirun_connector_nodeadmin = ["connector.manifest.json"]

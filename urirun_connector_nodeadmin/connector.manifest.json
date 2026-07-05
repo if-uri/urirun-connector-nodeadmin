@@ -1,0 +1,23 @@
+{
+  "id": "nodeadmin",
+  "name": "node admin (fleet backend)",
+  "status": "available",
+  "category": "Management",
+  "summary": "The node-side management surface a urirun-fleet reconcile plan drives: rich runtime state, registry rebuild, restart (drop stale workers), atomic upgrade/rollback, and capability smoke — all as admin-gated node:// routes.",
+  "description": "This connector is the backend for fleet reconciliation. A host computes drift and emits node:// remedy URIs; this connector executes them ON the node: runtime/query/state reports the ground-truth version/registry/lockfile a host diffs against desired state; registry/command/rebuild recompiles a registry built from stale bindings; runtime/command/restart (and worker/command/reload) restart the service to drop stale warm-worker imports; runtime/command/upgrade builds a fresh release OFF to the side (venv + deps + registry), smoke-tests it, and only then flips the current symlink and restarts (atomic — a failed build/smoke never touches the running node); runtime/command/rollback swaps back to the previous release; smoke/command/run checks required routes are present. Atomic releases reuse urirun-fleet's ReleaseManager. These are ADMIN operations — the node must gate node:// behind an enrolled key / token.",
+  "useCases": [
+    "Let a host fix a stale node over the mesh: rebuild registry, restart, verify — no SSH.",
+    "Upgrade a node atomically (build+smoke off to the side, switch only on pass), roll back on failure.",
+    "Report lockfile-grade runtime state so the fleet can diff desired vs actual accurately."
+  ],
+  "flowExample": [
+    "node://laptop/runtime/query/state",
+    "node://laptop/registry/command/rebuild",
+    "node://laptop/runtime/command/restart",
+    "node://laptop/smoke/command/run"
+  ],
+  "requires": [
+    "python>=3.10",
+    "urirun-fleet>=0.1.0"
+  ]
+}
