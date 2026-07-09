@@ -123,9 +123,6 @@ def smoke_run(required_routes: list | None = None) -> dict[str, Any]:
         return _fail(str(exc), "node-smoke")
 
 
-def urirun_bindings() -> dict[str, Any]:
-    return conn.bindings()
-
 @conn.handler("node://host/doctor/query/report", isolated=True, meta={"label": "Connector readiness report"})
 def doctor() -> dict[str, Any]:
     """Return a safe, read-only connector readiness report for CI smoke tests."""
@@ -144,6 +141,10 @@ def _connector_version() -> str:
         return version("urirun-connector-nodeadmin")
     except Exception:
         return "0.1.0"
+
+
+def urirun_bindings() -> dict[str, Any]:
+    return conn.bindings()
 
 
 def connector_manifest() -> dict[str, Any]:

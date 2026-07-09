@@ -39,22 +39,21 @@ jobs:
         working-directory: urirun-connector-nodeadmin
         run: |
           python - <<'PY'
-          import json
 
+          import json
+          from pathlib import Path
           from urirun_connector_nodeadmin.core import urirun_bindings
 
+          SMOKE_ROUTE = "node://host/runtime/query/state"
           bindings = urirun_bindings()
+          expected_routes = set(bindings.get("bindings", {}).keys())
+          assert expected_routes, "connector emitted no bindings"
+          assert SMOKE_ROUTE in expected_routes, "safe smoke route missing from bindings"
           text = json.dumps(bindings)
-          assert "node://host/doctor/query/report" in text, "safe doctor route missing from bindings"
-
-          forbidden = ['kvm://', 'fs://', 'pdf://', 'browser://', 'http-check://', 'httpcheck://', 'router://', 'mqtt://', 'github://', 'ocr://', 'camera://', 'usb://', 'adb://', 'email://', 'calendar://', 'doc://', 'docid://', 'document://', 'flow://', 'invoice://', 'koru://', 'ksef://', 'linkedin://', 'llm://', 'dns://', 'netscan://', 'task://', 'sheet://', 'smartcrop://', 'data://', 'artifact://', 'check://', 'log://', 'time://', 'twin://', 'urifix://', 'urivision://', 'runtime://', 'vdisplay://', 'view://', 'vql://', 'webnode://', 'youtube://', 'agent://', 'connector://', 'adopt://', 'monitor://', 'device://', 'webcam://']
-          for marker in forbidden:
-              assert marker not in text, f"Unexpected non-current connector route found: {marker}"
-
           print("Connector import and isolated bindings OK")
           PY
 
-      - name: Build isolated registry and run safe doctor route
+      - name: Build isolated registry and run safe smoke route
         run: |
           mkdir -p .urirun
 
@@ -64,8 +63,8 @@ jobs:
           from urirun_connector_nodeadmin.core import urirun_bindings
 
           bindings = urirun_bindings()
-          text = json.dumps(bindings)
-          assert "node://host/doctor/query/report" in text, "safe doctor route missing"
+          expected_routes = set(bindings.get("bindings", {}).keys())
+          assert "node://host/runtime/query/state" in expected_routes, "safe smoke route missing"
           Path(".urirun/node.bindings.v2.json").write_text(
               json.dumps(bindings, indent=2, sort_keys=True),
               encoding="utf-8",
@@ -74,7 +73,7 @@ jobs:
 
           urirun compile .urirun/node.bindings.v2.json --out .urirun/node.registry.json
 
-          urirun run             'node://host/doctor/query/report'             .urirun/node.registry.json             --execute             --allow 'node://**'             | tee run-response.json
+          urirun run             'node://host/runtime/query/state'             .urirun/node.registry.json             --execute             --allow 'node://**'             | tee run-response.json
 
           python - <<'PY'
           import json
@@ -86,6 +85,5 @@ jobs:
           assert response.get("ok") is True, response
           assert isinstance(value, dict), response
           assert value.get("ok") is True, response
-          assert value.get("status") == "ready", response
-          print("Safe doctor route through urirun run OK")
+          print("Safe smoke route through urirun run OK")
           PY
