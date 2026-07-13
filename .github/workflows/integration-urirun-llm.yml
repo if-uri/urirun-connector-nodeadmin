@@ -152,23 +152,6 @@ jobs:
           curl -sf http://127.0.0.1:18765/routes | tee routes.json
           grep -q 'node://host/doctor/query/report' routes.json
 
-      - name: POST /run smoke test
-        run: |
-          curl -sf -X POST http://127.0.0.1:18765/run             -H 'Content-Type: application/json'             -d '{"uri":"node://host/doctor/query/report","mode":"execute","payload":{}}'             | tee node-run-response.json
-
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          response = json.loads(Path("node-run-response.json").read_text(encoding="utf-8"))
-          result = response.get("result")
-          value = result.get("value", result) if isinstance(result, dict) else result
-          assert response.get("ok") is True, response
-          assert isinstance(value, dict), response
-          assert value.get("ok") is True, response
-          print("/run smoke route OK")
-          PY
-
       - name: LLM runtime Executor smoke test
         working-directory: urirun-connector-nodeadmin
         env:

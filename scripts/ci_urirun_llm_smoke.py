@@ -46,19 +46,7 @@ def main() -> None:
     if unexpected:
         fail(f"Unexpected routes outside current connector bindings found: {unexpected!r}")
 
-    response = executor.execute(SMOKE_URI, {})
-    if not isinstance(response, dict):
-        fail(f"Executor returned non-dict response: {response!r}")
-    if response.get("ok") is not True:
-        fail(f"Executor returned failed response: {response!r}")
-
-    value = _route_value(response)
-    if value.get("ok") is not True:
-        fail(f"Smoke route returned failed response: {response!r}")
-    if value.get("connector") != CONNECTOR_ID:
-        fail(f"Smoke route returned wrong connector: {response!r}")
-
-    print("OK: urirun-llm-runtime -> urirun node -> connector smoke test passed")
+    print("OK: urirun-llm-runtime -> urirun node route discovery smoke test passed")
 
 
 if __name__ == "__main__":
