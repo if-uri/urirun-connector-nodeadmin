@@ -9,7 +9,7 @@ from urirun_llm_runtime import Executor
 from urirun_connector_nodeadmin.core import urirun_bindings
 
 
-SMOKE_URI = "node://host/runtime/query/state"
+SMOKE_URI = "node://host/doctor/query/report"
 CONNECTOR_ID = "nodeadmin"
 
 

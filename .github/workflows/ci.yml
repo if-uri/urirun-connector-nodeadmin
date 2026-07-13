@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           from urirun_connector_nodeadmin.core import urirun_bindings
 
-          SMOKE_ROUTE = "node://host/runtime/query/state"
+          SMOKE_ROUTE = "node://host/doctor/query/report"
           bindings = urirun_bindings()
           expected_routes = set(bindings.get("bindings", {}).keys())
           assert expected_routes, "connector emitted no bindings"
@@ -64,7 +64,7 @@ jobs:
 
           bindings = urirun_bindings()
           expected_routes = set(bindings.get("bindings", {}).keys())
-          assert "node://host/runtime/query/state" in expected_routes, "safe smoke route missing"
+          assert "node://host/doctor/query/report" in expected_routes, "safe smoke route missing"
           Path(".urirun/node.bindings.v2.json").write_text(
               json.dumps(bindings, indent=2, sort_keys=True),
               encoding="utf-8",
@@ -73,7 +73,7 @@ jobs:
 
           urirun compile .urirun/node.bindings.v2.json --out .urirun/node.registry.json
 
-          urirun run             'node://host/runtime/query/state'             .urirun/node.registry.json             --execute             --allow 'node://**'             | tee run-response.json
+          urirun run             'node://host/doctor/query/report'             .urirun/node.registry.json             --execute             --allow 'node://**'             | tee run-response.json
 
           python - <<'PY'
           import json

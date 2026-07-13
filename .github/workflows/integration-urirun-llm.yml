@@ -54,7 +54,7 @@ jobs:
           from urirun_connector_nodeadmin.core import urirun_bindings
 
           bindings = urirun_bindings()
-          assert "node://host/runtime/query/state" in bindings["bindings"]
+          assert "node://host/doctor/query/report" in bindings["bindings"]
           print("Connector import and smoke bindings OK")
           PY
 
@@ -72,7 +72,7 @@ jobs:
           out.write_text(json.dumps(bindings, indent=2, sort_keys=True), encoding="utf-8")
 
           expected_routes = set(bindings.get("bindings", {}).keys())
-          assert "node://host/runtime/query/state" in expected_routes, "safe smoke route missing"
+          assert "node://host/doctor/query/report" in expected_routes, "safe smoke route missing"
           print("Wrote isolated bindings:", out)
           PY
 
@@ -88,7 +88,7 @@ jobs:
           from pathlib import Path
           from urirun_connector_nodeadmin.core import urirun_bindings
 
-          SMOKE_ROUTE = "node://host/runtime/query/state"
+          SMOKE_ROUTE = "node://host/doctor/query/report"
           bindings = urirun_bindings()
           expected_routes = set(bindings.get("bindings", {}).keys())
           assert expected_routes, "connector emitted no bindings"
@@ -121,7 +121,7 @@ jobs:
 
       - name: Run route directly through urirun
         run: |
-          urirun run             'node://host/runtime/query/state'             .urirun/node.registry.json             --execute             --allow 'node://**'             | tee run-response.json
+          urirun run             'node://host/doctor/query/report'             .urirun/node.registry.json             --execute             --allow 'node://**'             | tee run-response.json
 
           python - <<'PY'
           import json
@@ -150,11 +150,11 @@ jobs:
 
           curl -sf http://127.0.0.1:18765/health
           curl -sf http://127.0.0.1:18765/routes | tee routes.json
-          grep -q 'node://host/runtime/query/state' routes.json
+          grep -q 'node://host/doctor/query/report' routes.json
 
       - name: POST /run smoke test
         run: |
-          curl -sf -X POST http://127.0.0.1:18765/run             -H 'Content-Type: application/json'             -d '{"uri":"node://host/runtime/query/state","mode":"execute","payload":{}}'             | tee node-run-response.json
+          curl -sf -X POST http://127.0.0.1:18765/run             -H 'Content-Type: application/json'             -d '{"uri":"node://host/doctor/query/report","mode":"execute","payload":{}}'             | tee node-run-response.json
 
           python - <<'PY'
           import json
